@@ -11,7 +11,7 @@ router.post("/contact", async (req, res) => {
     await data.save();
     console.log("✅ Saved to MongoDB");
 
-    await addToGoogleSheet(req.body);
+    // await addToGoogleSheet(req.body);  
     console.log("✅ addToGoogleSheet called");
 
     res.status(200).json({ message: "Saved to MongoDB & Google Sheet" });
