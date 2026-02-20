@@ -7,26 +7,44 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// MongoDB (safe for serverless)
-let isConnected = false;
+// ✅ GLOBAL CACHE (serverless safe)
+let cached = global.mongoose;
 
-async function connectDB() {
-  if (isConnected) return;
-  await mongoose.connect(process.env.MONGO_URI);
-  isConnected = true;
-  console.log("MongoDB connected");
+if (!cached) {
+  cached = global.mongoose = { conn: null, promise: null };
 }
 
-connectDB().catch(console.error);
+async function connectDB() {
+  if (cached.conn) return cached.conn;
 
-// Root route (IMPORTANT)
-app.get("/", (req, res) => {
-  res.send("VTC Backend running on Vercel 🚀");
+  if (!cached.promise) {
+    cached.promise = mongoose.connect(process.env.MONGO_URI, {
+      bufferCommands: false,
+    }).then((mongoose) => mongoose);
+  }
+
+  cached.conn = await cached.promise;
+  return cached.conn;
+}
+
+// ✅ ENSURE DB CONNECTED BEFORE ROUTES
+app.use(async (req, res, next) => {
+  try {
+    await connectDB();
+    next();
+  } catch (err) {
+    console.error("❌ MongoDB connection error:", err);
+    res.status(500).json({ error: "Database connection failed" });
+  }
 });
 
 // Routes
 const contactRoutes = require("../routes/contactRoutes");
 app.use("/api", contactRoutes);
 
-// ❌ NO app.listen
+// Root route
+app.get("/", (req, res) => {
+  res.send("VTC Backend running on Vercel 🚀");
+});
+
 module.exports = app;
