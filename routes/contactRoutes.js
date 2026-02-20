@@ -1,22 +1,28 @@
 const express = require("express");
 const router = express.Router();
 
-const Contact = require("../models/contact");
-const { addToGoogleSheet } = require("../services/googleSheet.service");
+const Contact = require("../models/contact"); // ✅ small letter OK
 
 router.post("/contact", async (req, res) => {
   try {
     const data = new Contact(req.body);
     await data.save();
 
-    await addToGoogleSheet(req.body);
+    console.log("✅ Saved to MongoDB");
 
-    res.status(200).json({
-      message: "Saved to MongoDB & Google Sheet ✅"
-    });
+    res.status(200).json({ message: "Saved to MongoDB" });
 
   } catch (err) {
-    console.error("❌ ERROR:", err);
+    console.error("❌ Route Error:", err);
+    res.status(500).json({ error: err.message });
+  }
+});
+
+router.get("/contact", async (req, res) => {
+  try {
+    const data = await Contact.find().sort({ createdAt: -1 });
+    res.json(data);
+  } catch (err) {
     res.status(500).json({ error: err.message });
   }
 });
