@@ -14,8 +14,10 @@ router.post("/contact", async (req, res) => {
 
     // ✅ 2. Google Sheet OPTIONAL (non-blocking)
     addToGoogleSheet(req.body)
-      .then(() => console.log("✅ Saved to Google Sheet"))
-      .catch(err => console.error("⚠ Google Sheet failed:", err.message));
+      .then(() => console.log("✅ Google Sheet updated"))
+      .catch(err => {
+        console.error("❌ GOOGLE SHEET ERROR FULL:", err);
+      });
 
     // ✅ 3. Client ko success turant bhejo
     return res.status(200).json({
