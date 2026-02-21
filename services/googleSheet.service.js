@@ -3,7 +3,7 @@ const { google } = require("googleapis");
 const auth = new google.auth.JWT(
   process.env.GOOGLE_CLIENT_EMAIL,
   null,
-  process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, "\n"),
+  process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, "\n"), // 🔥 MUST
   ["https://www.googleapis.com/auth/spreadsheets"]
 );
 
@@ -19,6 +19,7 @@ async function addToGoogleSheet(data) {
         data.fullName,
         data.email,
         data.phone,
+        data.company,
         data.message,
         new Date().toLocaleString()
       ]]
