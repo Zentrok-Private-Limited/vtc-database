@@ -22,7 +22,7 @@ async function addToGoogleSheet(data) {
 
   // 2️⃣ Append full row
   await fetch(
-    `https://sheets.googleapis.com/v4/spreadsheets/${process.env.GOOGLE_SHEET_ID}/values/'Contact-Leads'!A:G:append?valueInputOption=RAW`,
+    `https://sheets.googleapis.com/v4/spreadsheets/${process.env.GOOGLE_SHEET_ID}/values/'VTC-Contact'!A:G:append?valueInputOption=RAW`,
     {
       method: "POST",
       headers: {
