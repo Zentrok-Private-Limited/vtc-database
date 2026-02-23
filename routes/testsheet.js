@@ -19,7 +19,6 @@ router.get("/test-sheet", async (req, res) => {
       { algorithm: "RS256" }
     );
 
-    // 1️⃣ Get access token
     const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
       method: "POST",
       headers: { "Content-Type": "application/x-www-form-urlencoded" },
@@ -31,11 +30,6 @@ router.get("/test-sheet", async (req, res) => {
 
     const tokenData = await tokenRes.json();
 
-    if (!tokenData.access_token) {
-      return res.status(500).json(tokenData);
-    }
-
-    // 2️⃣ Append test row
     const sheetRes = await fetch(
       `https://sheets.googleapis.com/v4/spreadsheets/${process.env.GOOGLE_SHEET_ID}/values/'Contact-Leads'!A:G:append?valueInputOption=RAW`,
       {
@@ -58,15 +52,10 @@ router.get("/test-sheet", async (req, res) => {
       }
     );
 
-    const result = await sheetRes.json();
-
-    return res.json({
-      success: true,
-      result,
-    });
+    res.json({ success: true, sheetRes: await sheetRes.json() });
 
   } catch (err) {
-    console.error("❌ TEST ERROR:", err);
+    console.error(err);
     res.status(500).json({ error: err.message });
   }
 });

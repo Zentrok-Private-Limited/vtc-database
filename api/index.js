@@ -39,6 +39,9 @@ app.use(async (req, res, next) => {
 });
 
 // Routes
+
+const testSheet = require("./routes/testsheet");
+app.use("/api", testSheet);
 const contactRoutes = require("../routes/contactRoutes");
 app.use("/api", contactRoutes);
 
