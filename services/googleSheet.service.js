@@ -1,27 +1,28 @@
 const { google } = require("googleapis");
+const { GoogleAuth } = require("google-auth-library");
 
-const auth = new google.auth.JWT(
-  process.env.GOOGLE_CLIENT_EMAIL,
-  null,
-  process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, "\n"), // 🔥 MUST
-  ["https://www.googleapis.com/auth/spreadsheets"]
-);
-
-const sheets = google.sheets({ version: "v4", auth });
+const auth = new GoogleAuth({
+  credentials: {
+    client_email: process.env.GOOGLE_CLIENT_EMAIL,
+    private_key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n'),
+  },
+  scopes: ["https://www.googleapis.com/auth/spreadsheets"],
+});
 
 async function addToGoogleSheet(data) {
+  const client = await auth.getClient();
+  const sheets = google.sheets({ version: "v4", auth: client });
+
   await sheets.spreadsheets.values.append({
     spreadsheetId: process.env.GOOGLE_SHEET_ID,
-    range: "Contact-Leads!A1",
-    valueInputOption: "USER_ENTERED",
+    range: "Contact-Lead!A:D",
+    valueInputOption: "RAW",
     requestBody: {
       values: [[
-        data.fullName,
-        data.email,
-        data.phone,
-        data.company,
-        data.message,
-        new Date().toLocaleString()
+        data.name || "",
+        data.email || "",
+        data.phone || "",
+        data.message || ""
       ]]
     }
   });
