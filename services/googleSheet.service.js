@@ -1,49 +1,26 @@
-const { getAccessToken } = require("./googleAuth");
-
 async function addToGoogleSheet(data) {
-  const jwtToken = getAccessToken();
+  try {
+    const client = await auth.getClient();
 
-  // 1️⃣ JWT → Access Token
-  const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams({
-      grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer",
-      assertion: jwtToken,
-    }),
-  });
+    const sheets = google.sheets({ version: "v4", auth: client });
 
-  const tokenData = await tokenRes.json();
-  const accessToken = tokenData.access_token;
-
-  if (!accessToken) {
-    throw new Error("Failed to get Google access token");
-  }
-
-  // 2️⃣ Append full row
-  await fetch(
-    `https://sheets.googleapis.com/v4/spreadsheets/${process.env.GOOGLE_SHEET_ID}/values/'VTC-Contact'!A:G:append?valueInputOption=RAW`,
-    {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
+    await sheets.spreadsheets.values.append({
+      spreadsheetId: process.env.GOOGLE_SHEET_ID,
+      range: "VTC-Contact!A:D",
+      valueInputOption: "RAW",
+      requestBody: {
         values: [[
-          data.fullName || "",
-          data.country || "",
+          data.name || "",
           data.email || "",
           data.phone || "",
-          data.company || "",
-          data.subject || "",
           data.message || ""
         ]]
-      }),
-    }
-  );
-
-  console.log("✅ Google Sheet updated successfully");
+      }
+    });
+  } catch (err) {
+    console.error("❌ Google Sheet Service Error:", err);
+    throw err;
+  }
 }
 
 module.exports = { addToGoogleSheet };
