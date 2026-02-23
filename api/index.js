@@ -4,10 +4,26 @@ const cors = require("cors");
 
 const app = express();
 
-app.use(cors());
+/* =======================
+   ✅ CORS CONFIG (FIXED)
+   ======================= */
+app.use(cors({
+  origin: [
+    "https://www.vtc.co.in",
+    "https://vtc.co.in"
+  ],
+  methods: ["GET", "POST", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+}));
+
+// 🔥 Preflight request handle (MOST IMPORTANT)
+app.options("*", cors());
+
 app.use(express.json());
 
-// ✅ GLOBAL CACHE (serverless safe)
+/* =======================
+   ✅ MONGODB (SERVERLESS SAFE)
+   ======================= */
 let cached = global.mongoose;
 
 if (!cached) {
@@ -38,14 +54,20 @@ app.use(async (req, res, next) => {
   }
 });
 
-// Routes
+/* =======================
+   ✅ ROUTES (PATH FIXED)
+   ======================= */
 
-const testSheet = require("./routes/testsheet");
+// ⚠️ Path must start with ./
+const testSheet = require("./routes/testSheet");
+const contactRoutes = require("./routes/contactRoutes");
+
 app.use("/api", testSheet);
-const contactRoutes = require("../routes/contactRoutes");
 app.use("/api", contactRoutes);
 
-// Root route
+/* =======================
+   ROOT
+   ======================= */
 app.get("/", (req, res) => {
   res.send("VTC Backend running on Vercel 🚀");
 });
