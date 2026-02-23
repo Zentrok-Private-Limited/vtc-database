@@ -1,31 +1,46 @@
-const { google } = require("googleapis");
-const { GoogleAuth } = require("google-auth-library");
-
-const auth = new GoogleAuth({
-  credentials: {
-    client_email: process.env.GOOGLE_CLIENT_EMAIL,
-    private_key: process.env.GOOGLE_PRIVATE_KEY.replace(/\\n/g, '\n'),
-  },
-  scopes: ["https://www.googleapis.com/auth/spreadsheets"],
-});
+const fetch = require("node-fetch");
+const { getAccessToken } = require("./googleAuth");
 
 async function addToGoogleSheet(data) {
-  const client = await auth.getClient();
-  const sheets = google.sheets({ version: "v4", auth: client });
+  const jwtToken = getAccessToken();
 
-  await sheets.spreadsheets.values.append({
-    spreadsheetId: process.env.GOOGLE_SHEET_ID,
-    range: "Contact-Lead!A:D",
-    valueInputOption: "RAW",
-    requestBody: {
-      values: [[
-        data.name || "",
-        data.email || "",
-        data.phone || "",
-        data.message || ""
-      ]]
-    }
+  // 1️⃣ JWT → Access Token
+  const tokenRes = await fetch("https://oauth2.googleapis.com/token", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+      grant_type: "urn:ietf:params:oauth:grant-type:jwt-bearer",
+      assertion: jwtToken,
+    }),
   });
+
+  const tokenData = await tokenRes.json();
+  const accessToken = tokenData.access_token;
+
+  // 2️⃣ Append full row (ALL fields)
+  await fetch(
+    `https://sheets.googleapis.com/v4/spreadsheets/${process.env.GOOGLE_SHEET_ID}/values/'Contact-Leads'!A:G:append?valueInputOption=RAW`,
+    {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        values: [[
+          data.fullName || "",
+          data.country || "",
+          data.email || "",
+          data.phone || "",
+          data.company || "",
+          data.subject || "",
+          data.message || ""
+        ]]
+      }),
+    }
+  );
+
+  console.log("✅ Google Sheet updated with full contact data");
 }
 
 module.exports = { addToGoogleSheet };
