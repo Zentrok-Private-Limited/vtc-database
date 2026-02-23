@@ -14,6 +14,8 @@ mongoose.connect(process.env.MONGO_URI)
   .catch(err => console.error("Mongo error:", err));
 
 // Routes
+const testSheet = require("./routes/testsheet");
+app.use("/api", testSheet);
 const contactRoutes = require("./routes/contactRoutes");
 app.use("/api", contactRoutes);
 
