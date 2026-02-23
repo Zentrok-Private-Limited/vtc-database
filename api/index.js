@@ -1,29 +1,29 @@
 const express = require("express");
 const mongoose = require("mongoose");
-const cors = require("cors");
 
 const app = express();
 
-/* =======================
-   ✅ CORS CONFIG (FIXED)
-   ======================= */
-app.use(cors({
-  origin: [
-    "https://www.vtc.co.in",
-    "https://vtc.co.in"
-  ],
-  methods: ["GET", "POST", "OPTIONS"],
-  allowedHeaders: ["Content-Type", "Authorization"]
-}));
+/* =========================
+   ✅ HARD CORS FIX (FINAL)
+   ========================= */
+app.use((req, res, next) => {
+  res.setHeader("Access-Control-Allow-Origin", "https://www.vtc.co.in");
+  res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
+  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
 
-// 🔥 Preflight request handle (MOST IMPORTANT)
-app.options("*", cors());
+  // 🔥 Preflight request yahin khatam
+  if (req.method === "OPTIONS") {
+    return res.status(204).end();
+  }
+
+  next();
+});
 
 app.use(express.json());
 
-/* =======================
+/* =========================
    ✅ MONGODB (SERVERLESS SAFE)
-   ======================= */
+   ========================= */
 let cached = global.mongoose;
 
 if (!cached) {
@@ -43,7 +43,7 @@ async function connectDB() {
   return cached.conn;
 }
 
-// ✅ ENSURE DB CONNECTED BEFORE ROUTES
+// 🔥 DB middleware AFTER preflight
 app.use(async (req, res, next) => {
   try {
     await connectDB();
@@ -54,20 +54,15 @@ app.use(async (req, res, next) => {
   }
 });
 
-/* =======================
-   ✅ ROUTES (PATH FIXED)
-   ======================= */
-
-// ⚠️ Path must start with ./
-const testSheet = require("./routes/testsheet");
+/* =========================
+   ROUTES
+   ========================= */
 const contactRoutes = require("./routes/contactRoutes");
+const testSheet = require("./routes/testsheet");
 
-app.use("/api", testSheet);
 app.use("/api", contactRoutes);
+app.use("/api", testSheet);
 
-/* =======================
-   ROOT
-   ======================= */
 app.get("/", (req, res) => {
   res.send("VTC Backend running on Vercel 🚀");
 });
