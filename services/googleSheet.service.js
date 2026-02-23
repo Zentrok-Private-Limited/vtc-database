@@ -1,4 +1,3 @@
-const fetch = require("node-fetch");
 const { getAccessToken } = require("./googleAuth");
 
 async function addToGoogleSheet(data) {
@@ -17,7 +16,11 @@ async function addToGoogleSheet(data) {
   const tokenData = await tokenRes.json();
   const accessToken = tokenData.access_token;
 
-  // 2️⃣ Append full row (ALL fields)
+  if (!accessToken) {
+    throw new Error("Failed to get Google access token");
+  }
+
+  // 2️⃣ Append full row
   await fetch(
     `https://sheets.googleapis.com/v4/spreadsheets/${process.env.GOOGLE_SHEET_ID}/values/'Contact-Leads'!A:G:append?valueInputOption=RAW`,
     {
@@ -40,7 +43,7 @@ async function addToGoogleSheet(data) {
     }
   );
 
-  console.log("✅ Google Sheet updated with full contact data");
+  console.log("✅ Google Sheet updated successfully");
 }
 
 module.exports = { addToGoogleSheet };
