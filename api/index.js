@@ -1,29 +1,13 @@
 const express = require("express");
 const mongoose = require("mongoose");
+const cors = require("cors");
 
 const app = express();
 
-/* =========================
-   ✅ HARD CORS FIX (FINAL)
-   ========================= */
-app.use((req, res, next) => {
-  res.setHeader("Access-Control-Allow-Origin", "https://www.vtc.co.in");
-  res.setHeader("Access-Control-Allow-Methods", "GET,POST,OPTIONS");
-  res.setHeader("Access-Control-Allow-Headers", "Content-Type, Authorization");
-
-  // 🔥 Preflight request yahin khatam
-  if (req.method === "OPTIONS") {
-    return res.status(204).end();
-  }
-
-  next();
-});
-
+app.use(cors());
 app.use(express.json());
 
-/* =========================
-   ✅ MONGODB (SERVERLESS SAFE)
-   ========================= */
+// ✅ GLOBAL CACHE (serverless safe)
 let cached = global.mongoose;
 
 if (!cached) {
@@ -43,7 +27,7 @@ async function connectDB() {
   return cached.conn;
 }
 
-// 🔥 DB middleware AFTER preflight
+// ✅ ENSURE DB CONNECTED BEFORE ROUTES
 app.use(async (req, res, next) => {
   try {
     await connectDB();
@@ -54,15 +38,11 @@ app.use(async (req, res, next) => {
   }
 });
 
-/* =========================
-   ROUTES
-   ========================= */
-const contactRoutes = require("./routes/contactRoutes");
-const testSheet = require("./routes/testsheet");
-
+// Routes
+const contactRoutes = require("../routes/contactRoutes");
 app.use("/api", contactRoutes);
-app.use("/api", testSheet);
 
+// Root route
 app.get("/", (req, res) => {
   res.send("VTC Backend running on Vercel 🚀");
 });
