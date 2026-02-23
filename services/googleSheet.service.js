@@ -10,9 +10,12 @@ async function addToGoogleSheet(data) {
       valueInputOption: "RAW",
       requestBody: {
         values: [[
-          data.name || "",
+          data.fullName || "",
+          data.country || "",
           data.email || "",
           data.phone || "",
+          data.company || "",
+          data.subject || "",
           data.message || ""
         ]]
       }

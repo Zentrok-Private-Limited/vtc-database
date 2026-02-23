@@ -6,21 +6,19 @@ const { addToGoogleSheet } = require("../services/googleSheet.service");
 
 router.post("/contact", async (req, res) => {
   try {
-    // ✅ 1. MongoDB FIRST (critical)
+    // 1️⃣ MongoDB FIRST
     const data = new Contact(req.body);
     await data.save();
-
     console.log("✅ Saved to MongoDB");
 
-    // ✅ 2. Google Sheet OPTIONAL (non-blocking)
+    // 2️⃣ Google Sheet OPTIONAL (non-blocking)
     addToGoogleSheet(req.body)
       .then(() => console.log("✅ Google Sheet updated"))
-      .catch(err => {
-        console.error("❌ GOOGLE SHEET ERROR FULL:", err);
-      });
+      .catch(err => console.error("❌ GOOGLE SHEET ERROR:", err));
 
-    // ✅ 3. Client ko success turant bhejo
+    // 3️⃣ Client response
     return res.status(200).json({
+      success: true,
       message: "Saved successfully ✅"
     });
 
