@@ -2,14 +2,13 @@
   "name": "backend",
   "version": "1.0.0",
   "type": "commonjs",
-
   "engines": {
     "node": "24.x"
   },
-
   "dependencies": {
+    "dotenv": "^17.3.1",
     "express": "^4.19.2",
-    "mongoose": "^8.12.1",
-    "jsonwebtoken": "^9.0.2"
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.12.1"
   }
 }
