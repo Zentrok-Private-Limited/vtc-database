@@ -12,9 +12,8 @@ router.post("/contact", async (req, res) => {
     console.log("✅ Saved to MongoDB");
 
     // 2️⃣ Google Sheet OPTIONAL (non-blocking)
-    addToGoogleSheet(req.body)
-      .then(() => console.log("✅ Google Sheet updated"))
-      .catch(err => console.error("❌ GOOGLE SHEET ERROR:", err));
+    await addToGoogleSheet(req.body);
+    console.log("✅ Google Sheet updated");
 
     // 3️⃣ Client response
     return res.status(200).json({
@@ -23,9 +22,14 @@ router.post("/contact", async (req, res) => {
     });
 
   } catch (err) {
-    console.error("❌ MongoDB ERROR:", err);
-    return res.status(500).json({ error: "Database error" });
-  }
+    console.error("❌ ERROR:", err);
+
+    return res.status(500).json({
+      success: false,
+      message: err.message,
+      stack: err.stack
+    });
+  } atus(500).json({ error: "Database error" });
 });
 
 module.exports = router;
