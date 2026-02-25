@@ -3,7 +3,7 @@
   "version": "1.0.0",
   "type": "commonjs",
   "engines": {
-    "node": "24.x"
+    "node": "22.x"
   },
   "dependencies": {
     "dotenv": "^17.3.1",
