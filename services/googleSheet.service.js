@@ -13,7 +13,7 @@ async function addToGoogleSheet(data) {
 
     await sheets.spreadsheets.values.append({
       spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      range: "Contact-Leads!A:G",
+      range: "'Contact-Leads'!A:H", // 👈 8 columns
       valueInputOption: "RAW",
       requestBody: {
         values: [[
@@ -23,7 +23,8 @@ async function addToGoogleSheet(data) {
           data.phone || "",
           data.company || "",
           data.subject || "",
-          data.message || ""
+          data.message || "",
+          new Date().toLocaleString("en-IN") // 👈 Date column
         ]]
       }
     });
