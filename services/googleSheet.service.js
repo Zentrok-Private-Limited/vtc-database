@@ -13,7 +13,7 @@ async function addToGoogleSheet(data) {
 
     await sheets.spreadsheets.values.append({
       spreadsheetId: process.env.GOOGLE_SHEET_ID,
-      range: "Contact-Leads!A1", // 🔥 THIS IS THE FIX
+      range: "VTC-Contact!A1", // 🔥 THIS IS THE FIX
       valueInputOption: "RAW",
       requestBody: {
         values: [[
